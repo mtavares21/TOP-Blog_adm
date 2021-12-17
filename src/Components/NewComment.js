@@ -3,13 +3,13 @@ import { useState } from "react";
 import { saveComment } from "../blogApi";
 import { UserContext } from "../App";
 
-export default function NewComment({ adminInfo, postid, setNewComment }) {
+export default function NewComment({postid, setNewComment }) {
   const [error, setError] = useState(false);
   const user = useContext(UserContext);
 
   const createComment = (e) => {
     const text = e.target.form[0].value;
-    saveComment(postid, user, text)
+    saveComment(postid, user.token, text)
       .then((response) => {
         setNewComment((prev) => false);
       })

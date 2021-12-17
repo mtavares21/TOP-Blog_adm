@@ -2,38 +2,39 @@ import React from "react";
 import Post from "./Components/Post";
 import User from "./Components/User";
 import Login from "./Components/Login";
-import { getPosts, logIn, getUser } from "./blogApi";
+import { getPosts } from "./blogApi";
 import { useEffect, useState } from "react";
-import NewPost from "./Components/NewPost";
-
-const adminUser = logIn({
-  username: "migtavares6@gmail.com",
-  password: process.env.REACT_APP_API_ADMIN_PASS,
-});
+//import NewPost from "./Components/NewPost";
+import Switch from "./Components/Switch";
+import Tiny from "./Components/Tiny";
 
 const UserContext = React.createContext(null);
+
+function decodeHtml(html) {
+  var txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+}
+
+const isHtml = (txt) => {
+  const htmlParser = new DOMParser();
+  const parsedText =htmlParser.parseFromString("<div>" + decodeHtml(txt) + "</div>", "text/xml");
+  return !!!parsedText.querySelector("parsererror");
+};
+
 
 function App() {
   const [posts, setPosts] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [adminInfo, setAdminInfo] = useState(adminUser);
   const [show, setShow] = useState(false);
   const [user, setUser] = useState(null);
-  const [checked, setChecked] = useState(
+  const [theme, setTheme] = useState(
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
 
   useEffect(() => {
-    getUser()
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((error) => console.log(error));
-  }, []);
-
-  useEffect(() => {
-    getPosts(adminInfo)
+    getPosts()
       .then((response) => {
         setPosts((prev) => response);
       })
@@ -43,7 +44,7 @@ function App() {
       .finally(() => {
         setLoading((prev) => false);
       });
-  }, [adminInfo]);
+  }, []);
 
   const renderPosts = () => {
     if (loading) return <div className="loader"></div>;
@@ -52,26 +53,39 @@ function App() {
     } else {
       return posts.map((post) => {
         const date = new Date(post.updatedAt);
-        return (
-          <div key={post._id} className="flex flex-wrap w-4/5 justify-center">
-            <Post
-              postId={post._id}
-              adminInfo={adminInfo}
-              title={post.title}
-              text={post.text}
-              date={date.toDateString()}
-            />
-          </div>
-        );
+        if (isHtml(post.text)) {
+          return (
+            <div key={post._id} className="flex flex-wrap w-4/5 justify-center">
+              <Post
+                key={post._id}
+                postId={post._id}
+                title={post.title}
+                html={post.text}
+                date={date.toDateString()}
+              />
+            </div>
+          );
+        } else {
+          return (
+            <div key={post._id} className="flex flex-wrap w-4/5 justify-center">
+              <Post
+                postId={post._id}
+                title={post.title}
+                text={post.text}
+                date={date.toDateString()}
+              />
+            </div>
+          );
+        }
       });
     }
   };
-  console.log(user);
+
   return (
     <UserContext.Provider value={user}>
       <div
         className={`${
-          checked ? "dark" : null
+          theme ? "dark" : null
         } w-screen min-h-screen h-full  flex flex-wrap justify-center justify-items-center`}
       >
         <header className="flex pl-5 items-center justify-between font-sans text-2xl font-bold text-red-400 bg-gray-800 h-24 w-full">
@@ -79,18 +93,9 @@ function App() {
           <User setShow={setShow} />
         </header>
         <Login show={show} setUser={setUser} />
-        <div className="dark:bg-gray-700 min-h-screen h-full self-center w-full flex flex-wrap justify-center font-sans">
-          <div className="w-full mt-5 mx-10 mb-0 flex justify-end">
-            <label className="switch">
-              <input
-                onClick={() => setChecked((prev) => !prev)}
-                type="checkbox"
-                checked={checked}
-              />
-              <span className="slider round"></span>
-            </label>
-          </div>
-          <NewPost />
+        <div className="dark:bg-gray-700 min-h-screen h-full self-center w-full flex flex-wrap justify-center justify-items-center font-sans">
+          <Switch bollean_click={() => setTheme((prev) => !prev)} />
+          {user ? <Tiny /> : null}
           {renderPosts()}
         </div>
       </div>

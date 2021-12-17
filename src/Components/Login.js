@@ -3,7 +3,7 @@ import { logIn, createUser, logOut } from "../blogApi";
 import { UserContext } from "../App";
 
 export default function Login({ show, setUser }) {
-  const [error, setMessage] = useState(null);
+  const [error, setError] = useState(null);
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
   const user = useContext(UserContext);
@@ -15,15 +15,17 @@ export default function Login({ show, setUser }) {
       password: password,
     }).then((resolve, reject) => {
       if (reject) {
-        setMessage((prev) => "Log-in failed");
+        setError((prev) => "Log-in failed");
       } else if (!!resolve.message) {
-        setMessage((prev) => resolve.message);
+        setError((prev) => "Please sign-up first.");
+      } else if (resolve.allow !== "WRITE") {
+        setError((prev) => "You're not an administrator.");
       } else {
         setUser((prev) => {
           return {
             user_id: resolve.user_id,
             username: resolve.username,
-            password: password,
+            token: resolve.token,
           };
         });
       }
@@ -37,10 +39,10 @@ export default function Login({ show, setUser }) {
       password: e.target.form[1].value,
     }).then((resolve, reject) => {
       if (reject) {
-        setMessage((prev) => "Sign-up failed.");
+        setError((prev) => "Sign-up failed.");
       } else if (!!resolve.message) {
-        setMessage((prev) => resolve.message);
-      } else setMessage((prev) => resolve);
+        setError((prev) => resolve.message);
+      } else setError((prev) => resolve);
     });
   };
 
@@ -88,7 +90,7 @@ export default function Login({ show, setUser }) {
             placeholder="password"
             className="w-full mb-3"
           />
-          <p>{error ? error.message : null}</p>
+          <p className="text-red-200">{error ? error : null}</p>
           <button
             type="button"
             onClick={logInUser}

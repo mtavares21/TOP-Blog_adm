@@ -2,7 +2,7 @@ const axios = require("axios");
 // Create User (sign-up)
 // User = { username:, password:}
 async function createUser(userInfo) {
-  const response = await fetch(`http://localhost:5000/v1/users/signup`, {
+  const response = await fetch(`https://gentle-refuge-60877.herokuapp.com/v1/users/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -18,11 +18,10 @@ async function createUser(userInfo) {
 // Login to Blog-API and get user details
 async function logIn(user) {
   try {
-    const response = await axios.post("http://localhost:5000/v1/users/login", {
+    const response = await axios.post("https://gentle-refuge-60877.herokuapp.com/v1/users/login", {
       username: user.username,
       password: user.password,
     });
-
     return response.data;
   } catch (err) {
     return err;
@@ -32,7 +31,7 @@ async function logIn(user) {
 // Logout
 async function logOut() {
   try {
-    const data = await fetch("http://localhost:5000/v1/users/logout", {
+    const data = await fetch("https://gentle-refuge-60877.herokuapp.com/v1/users/logout", {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       headers: {
         "Content-Type": "application/json",
@@ -50,7 +49,7 @@ async function logOut() {
 // Get user
 async function getUser() {
   try {
-    const response = await axios.get("http://localhost:5000/v1/users/user", {
+    const response = await axios.get("https://gentle-refuge-60877.herokuapp.com/v1/users/user", {
       withCredentials: true,
     });
     console.log({ getUser: response });
@@ -60,45 +59,75 @@ async function getUser() {
   }
 }
 // GET posts
-async function getPosts(adminInfo) {
-  const userInfo = await adminInfo;
-  const response = await fetch("http://localhost:5000/v1/posts/?published", {
+async function getPosts() {
+  const response = await fetch("https://gentle-refuge-60877.herokuapp.com/v1/allPosts", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       Accept: "*/*",
       Credentials: "include",
-      Authorization: "Bearer " + userInfo.token,
     },
   });
   const posts = await response.json();
 
   return posts;
 }
-
-// GET comments
-async function getComments(user, postId) {
-  // prettier-ignore
-  const response = await axios.get(
-    `http://localhost:5000/v1/comments/?postid=${encodeURIComponent(postId)}&username=${encodeURIComponent(user.username)}&password=${encodeURIComponent(user.password)}`);
-  console.log(response.data);
-  return response.data;
-}
-
 // POST comments
-async function saveComment(postid, user, text) {
+async function savePost(token, title, text, isPublished) {
   // prettier-ignore
   const response = await fetch(
-    `http://localhost:5000/v1/comments/?postid=${postid}`,
+    `https://gentle-refuge-60877.herokuapp.com/v1/posts`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Accept": "*/*",
+        "Credentials": "true",
+        "Authorization": "Bearer " + token,
       },
       body: JSON.stringify({
-        "username": user.username,
-        "password": user.password,
+        "title":title,
+        "text": text,
+        "isPublished":isPublished,
+      }),
+    }
+  ).catch( err => console.log(err));
+  const message = await response.json().catch((err) => console.log(err));
+
+  return message;
+}
+
+// GET comments
+async function getComments(postId, token) {
+  // prettier-ignore
+  const response = await fetch(
+    `https://gentle-refuge-60877.herokuapp.com/v1/comments/?postid=${encodeURIComponent(postId)}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*/*",
+        Credentials: "include",
+        "Authorization": "Bearer " + token,
+      },
+    });
+  return response.json();
+}
+
+// POST comments
+async function saveComment(postid, token, text) {
+  // prettier-ignore
+  const response = await fetch(
+    `https://gentle-refuge-60877.herokuapp.com/v1/comments/?postid=${postid}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "*/*",
+        "Credentials": "true",
+        "Authorization": "Bearer " + token,
+      },
+      body: JSON.stringify({
         "text": text,
       }),
     }
@@ -112,7 +141,7 @@ async function saveComment(postid, user, text) {
 async function updateComment(id, user, text) {
   // prettier-ignore
   const response = await fetch(
-    `http://localhost:5000/v1/comments/${id}/?username=${encodeURIComponent(user.username)}&password=${encodeURIComponent(user.password)}`,
+    `https://gentle-refuge-60877.herokuapp.com/v1/comments/${id}/?username=${encodeURIComponent(user.username)}&password=${encodeURIComponent(user.password)}`,
     {
       method: "PUT",
       headers: {
@@ -134,7 +163,7 @@ async function updateComment(id, user, text) {
 async function deleteComment(user, id) {
   // prettier-ignore
   const response = await fetch(
-    `http://localhost:5000/v1/comments/${encodeURIComponent(id)}/?username=${encodeURIComponent(user.username)}&password=${encodeURIComponent(user.password)}`,
+    `https://gentle-refuge-60877.herokuapp.com/v1/comments/${encodeURIComponent(id)}/?username=${encodeURIComponent(user.username)}&password=${encodeURIComponent(user.password)}`,
     {
       method: "DELETE",
       headers: {
@@ -149,6 +178,7 @@ async function deleteComment(user, id) {
 
 export {
   getPosts,
+  savePost,
   getComments,
   logIn,
   logOut,

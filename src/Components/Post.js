@@ -4,8 +4,9 @@ import Comment from "./Comment";
 import { getComments } from "../blogApi";
 import NewComment from "./NewComment";
 import { UserContext } from "../App";
+import Button from "./Button";
 
-export default function Post({ id, adminInfo, postId, title, text, date }) {
+export default function Post({ id, postId, title, text, date, html, preview }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -14,8 +15,8 @@ export default function Post({ id, adminInfo, postId, title, text, date }) {
   const user = useContext(UserContext);
 
   useEffect(() => {
-    if (showComments) {
-      getComments(user, postId)
+    if (showComments && user) {
+      getComments(postId, user.token)
         .then((response) => {
           setComments((prev) => response);
         })
@@ -57,34 +58,24 @@ export default function Post({ id, adminInfo, postId, title, text, date }) {
 
   const renderNewComment = () => {
     if (!!user && newComment) {
-      return (
-        <NewComment
-          postid={postId}
-          adminInfo={adminInfo}
-          setNewComment={setNewComment}
-        />
-      );
+      return <NewComment postid={postId} setNewComment={setNewComment} />;
     } else if (!!user) {
       return (
-        <button
-          type="button"
-          onClick={() => setNewComment((prev) => !prev)}
-          className="p-1 flex rounded-full bg-red-400 px-2 text-sm text-white"
-        >
-          New comment
-        </button>
+        <Button
+          onClick={preview ? () => {} : () => setNewComment((prev) => !prev)}
+          label="New Comment"
+        />
       );
     } else return null;
   };
-  console.log(error);
   return (
     <div className="dark:bg-gray-700 container mt-10 md:w-2/3 flex flex-wrap items-center justify-center bg-white">
-      <div className="container mt-10 mb-2 flex flex-wrap justify-center items-center">
+      <div className="container mt-10 flex flex-wrap justify-center items-center">
         <h1 className="w-full my-10 text-center text-red-400 font-sans font-bold text-4xl">
           {title}
         </h1>
-        <p className="dark:text-gray-200 w-full font-serif text-justify">
-          {text}
+        <p className="dark:text-gray-200 w-full font-serif text-justify min-h-70">
+          {!!html ? <div dangerouslySetInnerHTML={{ __html: html }} /> : text}
         </p>
         <p className="w-full font-serif underline-red-500">
           <mark className="bg-red-400 px-2 text-sm text-white">{date}</mark>
@@ -94,12 +85,12 @@ export default function Post({ id, adminInfo, postId, title, text, date }) {
         {renderNewComment()}
         <div className="w-full">
           {!!user ? (
-            <button
-              onClick={() => setShowComments((prev) => !prev)}
-              className="p-1 mt-2 mb-5 flex rounded-full bg-red-400 px-2 text-sm text-white"
-            >
-              {showComments ? "Hide comments" : "See comments"}
-            </button>
+            <Button
+              onClick={
+                preview ? () => {} : () => setShowComments((prev) => !prev)
+              }
+              label={showComments ? "Hide comments" : "See comments"}
+            />
           ) : null}
           {showComments && !!user ? renderComments() : null}
         </div>
