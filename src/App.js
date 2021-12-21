@@ -18,10 +18,12 @@ function decodeHtml(html) {
 
 const isHtml = (txt) => {
   const htmlParser = new DOMParser();
-  const parsedText =htmlParser.parseFromString("<div>" + decodeHtml(txt) + "</div>", "text/xml");
+  const parsedText = htmlParser.parseFromString(
+    "<div>" + decodeHtml(txt) + "</div>",
+    "text/xml"
+  );
   return !!!parsedText.querySelector("parsererror");
 };
-
 
 function App() {
   const [posts, setPosts] = useState(null);
@@ -61,6 +63,7 @@ function App() {
                 postId={post._id}
                 title={post.title}
                 html={post.text}
+                isPublished={post.isPublished}
                 date={date.toDateString()}
               />
             </div>
@@ -72,6 +75,7 @@ function App() {
                 postId={post._id}
                 title={post.title}
                 text={post.text}
+                isPublished={post.isPublished}
                 date={date.toDateString()}
               />
             </div>
@@ -80,7 +84,6 @@ function App() {
       });
     }
   };
-
   return (
     <UserContext.Provider value={user}>
       <div

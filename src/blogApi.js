@@ -96,6 +96,47 @@ async function savePost(token, title, text, isPublished) {
 
   return message;
 }
+// POST comments
+async function deletePost(token, postId) {
+  // prettier-ignore
+  const response = await fetch(
+    `https://gentle-refuge-60877.herokuapp.com/v1/posts/${postId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "*/*",
+        "Credentials": "true",
+        "Authorization": "Bearer " + token,
+      },
+    }
+  ).catch( err => console.log(err));
+  const message = await response.json().catch((err) => console.log(err));
+
+  return message;
+}
+// POST comments
+async function updatePost(token, postId, isPublished) {
+  // prettier-ignore
+  const response = await fetch(
+    `https://gentle-refuge-60877.herokuapp.com/v1/posts/${postId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "*/*",
+        "Credentials": "true",
+        "Authorization": "Bearer " + token,
+      },
+      body: JSON.stringify({
+        "isPublished":isPublished,
+      }),
+    }
+  ).catch( err => console.log(err));
+  const message = await response.json().catch((err) => console.log(err));
+
+  return message;
+}
 
 // GET comments
 async function getComments(postId, token) {
@@ -179,6 +220,8 @@ async function deleteComment(user, id) {
 export {
   getPosts,
   savePost,
+  deletePost,
+  updatePost,
   getComments,
   logIn,
   logOut,
