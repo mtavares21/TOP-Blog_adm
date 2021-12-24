@@ -52,7 +52,7 @@ export default function Tiny() {
         />
         <div className="flex flex-wrap justify-center w-4/5 mb-5">
           <Editor
-            apiKey="4v257mskas6ptum94kunxyqukzez33g6yoxn2lopehctvjkw"
+            apiKey= {process.env.REACT_APP_TINY_PASS}
             onInit={(evt, editor) => (editorRef.current = editor)}
             value={value}
             onEditorChange={(newValue, editor) => setValue((prev) => newValue)}
