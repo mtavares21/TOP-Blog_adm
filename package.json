@@ -1,6 +1,7 @@
 {
   "name": "blog-admin",
   "version": "0.1.0",
+  "homepage": "https://mtavares21.github.io/TOP-Blog_adm/",
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.2.0",
