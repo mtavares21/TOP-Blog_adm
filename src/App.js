@@ -95,7 +95,7 @@ function App() {
           I'm a Blogger now
           <User setShow={setShow} />
         </header>
-        <Login show={show} setUser={setUser} />
+        {show ? <Login setUser={setUser} /> : null}
         <div className="dark:bg-gray-700 min-h-screen h-full self-center w-full flex flex-wrap justify-center justify-items-center font-sans">
           <Switch bollean_click={() => setTheme((prev) => !prev)} />
           {user ? <Tiny /> : null}
